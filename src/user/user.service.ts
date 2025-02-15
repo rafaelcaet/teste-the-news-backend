@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserResponse } from './entities/user-response.entity';
@@ -23,9 +23,22 @@ export class UserService {
    * @returns User
    */
   async getOne(userEmail: string): Promise<UserResponse> {
-    const { email, dayStreak } = await this.prisma.users.findUnique({
+    const user = await this.prisma.users.findUnique({
       where: { email: userEmail },
     });
-    return { email, dayStreak };
+    if (!user) throw new UnprocessableEntityException('User Not found');
+    return { email: user.email, dayStreak: user.dayStreak };
+  }
+  /**
+   * Return all users from database
+   * @returns User
+   */
+  async getAll(): Promise<UserResponse[]> {
+    return await this.prisma.users.findMany({
+      select: {
+        email: true,
+        dayStreak: true,
+      },
+    });
   }
 }
