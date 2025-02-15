@@ -29,6 +29,7 @@ export class UserService {
     if (!user) throw new UnprocessableEntityException('User Not found');
     return { email: user.email, dayStreak: user.dayStreak };
   }
+
   /**
    * Return all users from database
    * @returns User
@@ -40,5 +41,27 @@ export class UserService {
         dayStreak: true,
       },
     });
+  }
+
+  /**
+   * Increment user day streak by email
+   * @param userEmail string
+   * @returns
+   */
+  async incrementDayStreakByEmail(userEmail: string): Promise<void> {
+    try {
+      await this.prisma.users.update({
+        data: {
+          dayStreak: {
+            increment: 1,
+          },
+        },
+        where: { email: userEmail },
+      });
+      return;
+    } catch (err) {
+      console.error(err);
+      throw new UnprocessableEntityException();
+    }
   }
 }

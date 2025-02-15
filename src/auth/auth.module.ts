@@ -9,7 +9,7 @@ import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }), // Adicione esta linha
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: jwt.secret,
       signOptions: { expiresIn: '1h' },

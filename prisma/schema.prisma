@@ -10,7 +10,8 @@ datasource db {
 model Users {
   id        Int      @id @default(autoincrement())
   email     String   @unique @db.VarChar(55)
-  dayStreak Int      @default(1) @map("day_streak") @db.Integer
+  lastLogin DateTime @default(now()) @map("last_login")
+  dayStreak Int      @default(1) @map("day_streak")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 

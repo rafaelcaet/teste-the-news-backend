@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,7 +29,15 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  async getUser(@Query('email') userEmail: string) {
+  async getUser(@Request() req) {
+    const userEmail = req.user.email;
     return this.userService.getOne(userEmail);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('profile/streak')
+  async updateDayStreak(@Request() req) {
+    const userEmail = req.user.email;
+    return this.userService.incrementDayStreakByEmail(userEmail);
   }
 }
