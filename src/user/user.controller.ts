@@ -29,15 +29,15 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  async getUser(@Request() req) {
+  async getUser(@Request() req: any) {
     const userEmail = req.user.email;
     return this.userService.getOne(userEmail);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('profile/streak')
-  async updateDayStreak(@Request() req) {
+  async updateDayStreak(@Request() req: any) {
     const userEmail = req.user.email;
-    return this.userService.incrementDayStreakByEmail(userEmail);
+    return this.userService.updateUserStreak(userEmail);
   }
 }

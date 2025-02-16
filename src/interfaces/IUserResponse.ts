@@ -1,6 +1,6 @@
-import { INewsLetter } from 'src/interfaces/INewsLetter';
+import { INewsLetter } from './INewsLetter';
 
-export class UserResponse {
+export interface IUserResponse {
   email: string;
   dayStreak: number;
   lastLogin: Date;

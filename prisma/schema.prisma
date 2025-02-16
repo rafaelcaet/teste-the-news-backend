@@ -8,12 +8,42 @@ datasource db {
 }
 
 model Users {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   email     String   @unique @db.VarChar(55)
   lastLogin DateTime @default(now()) @map("last_login")
-  dayStreak Int      @default(1) @map("day_streak")
+  dayStreak Int      @default(0) @map("day_streak")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
+  newsletters UserNewsletter[]
+
   @@map("users")
+}
+
+model UserNewsletter {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  newsletterId String   @map("news_letter_id")
+  openedAt     DateTime @map("open_at")
+
+  user       Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newsletter Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, newsletterId])
+  @@map("user_news_letter")
+}
+
+model Newsletter {
+  id          String   @id @default(uuid())
+  title       String
+  sentAt      DateTime
+  utmCampaign String?  @map("utm_campaign")
+  utmSource   String?  @map("utm_source")
+  utmMedium   String?  @map("utm_medium")
+  utmChannel  String?  @map("utm_channel")
+  createdAt   DateTime @default(now())
+
+  userNewsletters UserNewsletter[]
+
+  @@map("news_letter")
 }
