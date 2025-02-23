@@ -6,6 +6,7 @@ import {
   Request,
   UseGuards,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,6 +21,26 @@ export class UserController {
     return this.userService.createUser({
       email: createUserDto.email,
     });
+  }
+
+  @Patch('promote')
+  @UseGuards(AuthGuard('jwt'))
+  async setUserAdmin(
+    @Request() req: any,
+    @Body() reqBody: { userEmail: string },
+  ) {
+    const adminEmail = req.user.email;
+    return this.userService.promoteToAdmin(adminEmail, reqBody.userEmail);
+  }
+
+  @Patch('demote')
+  @UseGuards(AuthGuard('jwt'))
+  async removeUserAdmin(
+    @Request() req: any,
+    @Body() reqBody: { userEmail: string },
+  ) {
+    const adminEmail = req.user.email;
+    return this.userService.demoteToAdmin(adminEmail, reqBody.userEmail);
   }
 
   /* private routes */

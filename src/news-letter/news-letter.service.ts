@@ -9,7 +9,7 @@ export class NewsLetterService {
     private readonly database: NodePgDatabase<typeof dbSchema>,
   ) {}
 
-  async createNewsletter(newsletter: typeof dbSchema.newsletters.$inferInsert) {
-    await this.database.insert(dbSchema.newsletters).values(newsletter);
+  async createNewsletter(newsletter: typeof dbSchema.newsLetter.$inferInsert) {
+    await this.database.insert(dbSchema.newsLetter).values(newsletter);
   }
 }

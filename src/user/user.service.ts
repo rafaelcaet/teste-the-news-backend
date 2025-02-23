@@ -1,8 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import * as dbSchema from '../database/schema';
 import { DATABASE_CONNECTION } from '../database/database-connection';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, desc, eq, gte, lt } from 'drizzle-orm';
+import { and, eq, gte, lt } from 'drizzle-orm';
 
 @Injectable()
 export class UserService {
@@ -17,6 +17,42 @@ export class UserService {
 
   async createUser(user: typeof dbSchema.users.$inferInsert) {
     await this.database.insert(dbSchema.users).values(user);
+  }
+
+  async promoteToAdmin(adminEmail: string, userEmail: string): Promise<string> {
+    const admin = await this.database.query.users.findFirst({
+      where: eq(dbSchema.users.email, adminEmail),
+    });
+    const user = await this.database.query.users.findFirst({
+      where: eq(dbSchema.users.email, userEmail),
+    });
+
+    if (!admin) throw new HttpException('Action not authorized', 401);
+    if (!user) throw new HttpException('User Not found', 409);
+
+    await this.database
+      .update(dbSchema.users)
+      .set({ isAdmin: 1 } as any)
+      .where(eq(dbSchema.users.email, userEmail));
+    return `${userEmail} has been promoted to Admin`;
+  }
+
+  async demoteToAdmin(adminEmail: string, userEmail: string): Promise<string> {
+    const admin = await this.database.query.users.findFirst({
+      where: eq(dbSchema.users.email, adminEmail),
+    });
+    const user = await this.database.query.users.findFirst({
+      where: eq(dbSchema.users.email, userEmail),
+    });
+
+    if (!admin) throw new HttpException('Action not authorized', 401);
+    if (!user) throw new HttpException('User Not found', 409);
+
+    await this.database
+      .update(dbSchema.users)
+      .set({ isAdmin: 0 } as any)
+      .where(eq(dbSchema.users.email, userEmail));
+    return `${userEmail} has been demoted to Admin`;
   }
 
   async getUser(userEmail: string) {
@@ -39,31 +75,30 @@ export class UserService {
 
     // Verificar se o usuário já abriu a newsletter hoje
     const alreadyOpenedToday =
-      await this.database.query.userNewsletters.findFirst({
+      await this.database.query.userNewsLetter.findFirst({
         where: and(
-          eq(dbSchema.userNewsletters.userId, user.id),
-          eq(dbSchema.userNewsletters.newsletterId, newsletterId),
-          gte(dbSchema.userNewsletters.openedAt, startOfDay),
-          lt(dbSchema.userNewsletters.openedAt, endOfDay),
+          eq(dbSchema.userNewsLetter.userId, user.id),
+          eq(dbSchema.userNewsLetter.newsLetterId, newsletterId),
+          gte(dbSchema.userNewsLetter.openAt, startOfDay.toISOString()),
+          lt(dbSchema.userNewsLetter.openAt, endOfDay.toISOString()),
         ),
       });
 
     if (!alreadyOpenedToday) {
       // Registrar abertura da newsletter
-      await this.database.insert(dbSchema.userNewsletters).values({
+      await this.database.insert(dbSchema.userNewsLetter).values({
         userId: user.id,
-        newsletterId: newsletterId,
-        openedAt: new Date(),
+        newsLetterId: newsletterId,
+        openAt: new Date().toISOString(),
       });
-
       // Atualizar streak
-      // await this.database
-      //   .update(dbSchema.users)
-      //   .set({
-      //     dayStreak: user.dayStreak + 1,
-      //     lastLogin: new Date(),
-      //   })
-      //   .where(eq(dbSchema.users.id, user.id));
+      await this.database
+        .update(dbSchema.users)
+        .set({
+          dayStreak: user.dayStreak + 1,
+          lastLogin: new Date(),
+        } as any) // Apliquei Any após apanhar muito pra entender que deveria tipar isso 🥹
+        .where(eq(dbSchema.users.id, user.id));
     }
   }
 }
