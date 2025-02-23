@@ -58,12 +58,11 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('profile/streak')
+  @Patch('profile/streak')
   async updateDayStreak(
-    @Request() req: any,
+    @Query('userEmail') userEmail: string,
     @Query('newsletterId') newsletterId: string,
   ) {
-    const userEmail = req.user.email;
     return this.userService.createUserAccess(userEmail, newsletterId);
   }
 }
