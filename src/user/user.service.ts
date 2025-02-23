@@ -11,14 +11,28 @@ export class UserService {
     private readonly database: NodePgDatabase<typeof dbSchema>,
   ) {}
 
+  /**
+   * Return all users from database
+   * @returns
+   */
   async getUsers() {
     return this.database.query.users.findMany();
   }
 
+  /**
+   * Create a new user to databse
+   * @param user
+   */
   async createUser(user: typeof dbSchema.users.$inferInsert) {
     await this.database.insert(dbSchema.users).values(user);
   }
 
+  /**
+   *  Promote a user to admin by email
+   * @param adminEmail
+   * @param userEmail
+   * @returns
+   */
   async promoteToAdmin(adminEmail: string, userEmail: string): Promise<string> {
     const admin = await this.database.query.users.findFirst({
       where: eq(dbSchema.users.email, adminEmail),
@@ -37,6 +51,12 @@ export class UserService {
     return `${userEmail} has been promoted to Admin`;
   }
 
+  /**
+   *  Demote user from admin by email
+   * @param adminEmail
+   * @param userEmail
+   * @returns
+   */
   async demoteToAdmin(adminEmail: string, userEmail: string): Promise<string> {
     const admin = await this.database.query.users.findFirst({
       where: eq(dbSchema.users.email, adminEmail),
@@ -55,6 +75,11 @@ export class UserService {
     return `${userEmail} has been demoted to Admin`;
   }
 
+  /**
+   * Get a user by email
+   * @param userEmail
+   * @returns
+   */
   async getUser(userEmail: string) {
     return this.database.query.users.findFirst({
       where: eq(dbSchema.users.email, userEmail),
@@ -62,6 +87,11 @@ export class UserService {
     });
   }
 
+  /**
+   * Create a new user newslatter`s access to database
+   * @param userEmail
+   * @param newsletterId
+   */
   async createUserAccess(userEmail: string, newsletterId: string) {
     // Buscar usuário pelo email
     const user = await this.getUser(userEmail);
