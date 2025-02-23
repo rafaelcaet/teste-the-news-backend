@@ -1,87 +1,69 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { UserResponse } from './entities/user-response.entity';
-import { IUserResponse } from 'src/interfaces/IUserResponse';
+import { Inject, Injectable } from '@nestjs/common';
+import * as dbSchema from '../database/schema';
+import { DATABASE_CONNECTION } from '../database/database-connection';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { and, desc, eq, gte, lt } from 'drizzle-orm';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject(DATABASE_CONNECTION)
+    private readonly database: NodePgDatabase<typeof dbSchema>,
+  ) {}
 
-  /**
-   * Insert a user at the database
-   * @param createUserDto CreateUserDto
-   */
-  async create(createUserDto: CreateUserDto) {
-    const { email } = createUserDto;
-    await this.prisma.users.create({ data: { email } });
-    return 'user created!';
+  async getUsers() {
+    return this.database.query.users.findMany();
   }
 
-  /**
-   * Return a user from database
-   * @param email string
-   * @returns User
-   */
-  async getOne(userEmail: string): Promise<any> {
-    const user = await this.prisma.users.findUnique({
-      where: { email: userEmail },
-    });
-    if (!user) throw new UnprocessableEntityException('User Not found');
-    return { email: user.email, dayStreak: user.dayStreak };
+  async createUser(user: typeof dbSchema.users.$inferInsert) {
+    await this.database.insert(dbSchema.users).values(user);
   }
 
-  /**
-   * Return all users from database
-   * @returns User
-   */
-  async getAll(): Promise<any> {
-    return await this.prisma.users.findMany({
-      select: {
-        email: true,
-        dayStreak: true,
-        lastLogin: true,
-        newsletters: true,
-      },
+  async getUser(userEmail: string) {
+    return this.database.query.users.findFirst({
+      where: eq(dbSchema.users.email, userEmail),
+      columns: { id: true, email: true, dayStreak: true, lastLogin: true },
     });
   }
 
-  /**
-   * Increment user day streak by email
-   * @param userEmail string
-   * @returns
-   */
-  async updateUserStreak(userEmail: string) {
-    const user = await this.prisma.users.findUnique({
-      where: { email: userEmail },
-    });
+  async createUserAccess(userEmail: string, newsletterId: string) {
+    // Buscar usuário pelo email
+    const user = await this.getUser(userEmail);
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
 
-    // lastest newsletter opening by user Id
-    const latestOpenings = await this.prisma.userNewsletter.findMany({
-      where: { userId: user.id },
-      orderBy: { openedAt: 'desc' },
-      take: 2,
-    });
-
-    // days to verify
     const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    if (
-      latestOpenings.length > 1 &&
-      new Date(latestOpenings[1].openedAt).toDateString() ===
-        yesterday.toDateString()
-    ) {
-      await this.prisma.users.update({
-        where: { email: userEmail },
-        data: { dayStreak: user.dayStreak + 1, lastLogin: new Date() },
+    // Verificar se o usuário já abriu a newsletter hoje
+    const alreadyOpenedToday =
+      await this.database.query.userNewsletters.findFirst({
+        where: and(
+          eq(dbSchema.userNewsletters.userId, user.id),
+          eq(dbSchema.userNewsletters.newsletterId, newsletterId),
+          gte(dbSchema.userNewsletters.openedAt, startOfDay),
+          lt(dbSchema.userNewsletters.openedAt, endOfDay),
+        ),
       });
-    } else {
-      await this.prisma.users.update({
-        where: { email: userEmail },
-        data: { dayStreak: 1, lastLogin: new Date() },
+
+    if (!alreadyOpenedToday) {
+      // Registrar abertura da newsletter
+      await this.database.insert(dbSchema.userNewsletters).values({
+        userId: user.id,
+        newsletterId: newsletterId,
+        openedAt: new Date(),
       });
+
+      // Atualizar streak
+      // await this.database
+      //   .update(dbSchema.users)
+      //   .set({
+      //     dayStreak: user.dayStreak + 1,
+      //     lastLogin: new Date(),
+      //   })
+      //   .where(eq(dbSchema.users.id, user.id));
     }
   }
 }

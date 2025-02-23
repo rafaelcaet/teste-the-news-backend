@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { INewsLetter } from 'src/interfaces/INewsLetter';
-import { PrismaService } from 'src/prisma/prisma.service';
-
+import { Inject, Injectable } from '@nestjs/common';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DATABASE_CONNECTION } from 'src/database/database-connection';
+import * as dbSchema from '../database/schema';
 @Injectable()
 export class NewsLetterService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject(DATABASE_CONNECTION)
+    private readonly database: NodePgDatabase<typeof dbSchema>,
+  ) {}
 
-  async create(newsLetter: INewsLetter) {
-    await this.prisma.newsletter.create({
-      data: { ...newsLetter, sentAt: new Date() },
-    });
-    return 'created!';
+  async createNewsletter(newsletter: typeof dbSchema.newsletters.$inferInsert) {
+    await this.database.insert(dbSchema.newsletters).values(newsletter);
   }
 }

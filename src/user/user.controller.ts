@@ -5,9 +5,9 @@ import {
   Get,
   Request,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
@@ -16,28 +16,33 @@ export class UserController {
 
   /* public routes */
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async createUser(@Body() createUserDto: { email: string }) {
+    return this.userService.createUser({
+      email: createUserDto.email,
+    });
   }
 
   /* private routes */
-  @UseGuards(AuthGuard('jwt'))
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async getAll() {
-    return this.userService.getAll();
+    return this.userService.getUsers();
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   async getUser(@Request() req: any) {
     const userEmail = req.user.email;
-    return this.userService.getOne(userEmail);
+    return this.userService.getUser(userEmail);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('profile/streak')
-  async updateDayStreak(@Request() req: any) {
+  async updateDayStreak(
+    @Request() req: any,
+    @Query('newsletterId') newsletterId: string,
+  ) {
     const userEmail = req.user.email;
-    return this.userService.updateUserStreak(userEmail);
+    return this.userService.createUserAccess(userEmail, newsletterId);
   }
 }

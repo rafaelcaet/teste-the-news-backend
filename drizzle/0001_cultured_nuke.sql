@@ -1,0 +1,1 @@
+ALTER TABLE "news_letter" ALTER COLUMN "sent_at" SET DEFAULT now();

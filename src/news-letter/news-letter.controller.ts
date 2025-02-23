@@ -8,6 +8,6 @@ export class NewsLetterController {
 
   @Post()
   async create(@Body() newsLetterReq: INewsLetter) {
-    return this.newsLetterService.create(newsLetterReq);
+    return this.newsLetterService.createNewsletter(newsLetterReq);
   }
 }
