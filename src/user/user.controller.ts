@@ -23,7 +23,11 @@ export class UserController {
     });
   }
 
-  /* private routes */
+  @Get()
+  async getAll() {
+    return this.userService.getUsers();
+  }
+
   @Patch('promote')
   @UseGuards(AuthGuard('jwt'))
   async setUserAdmin(
@@ -42,12 +46,6 @@ export class UserController {
   ) {
     const adminEmail = req.user.email;
     return this.userService.demoteToAdmin(adminEmail, reqBody.userEmail);
-  }
-
-  @Get()
-  @UseGuards(AuthGuard('jwt'))
-  async getAll() {
-    return this.userService.getUsers();
   }
 
   @UseGuards(AuthGuard('jwt'))
