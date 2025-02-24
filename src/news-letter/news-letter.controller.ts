@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { NewsLetterService } from './news-letter.service';
 import { INewsLetter } from 'src/interfaces/INewsLetter';
 
@@ -9,5 +9,9 @@ export class NewsLetterController {
   @Post()
   async create(@Body() newsLetterReq: INewsLetter) {
     return this.newsLetterService.createNewsletter(newsLetterReq);
+  }
+  @Get()
+  async getAll() {
+    return this.newsLetterService.getAll();
   }
 }

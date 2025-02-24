@@ -16,4 +16,8 @@ export class NewsLetterService {
   async createNewsletter(newsletter: typeof dbSchema.newsLetter.$inferInsert) {
     await this.database.insert(dbSchema.newsLetter).values(newsletter);
   }
+
+  async getAll() {
+    return this.database.query.newsLetter.findMany();
+  }
 }

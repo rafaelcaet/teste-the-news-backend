@@ -3,12 +3,15 @@ import * as dbSchema from '../database/schema';
 import { DATABASE_CONNECTION } from '../database/database-connection';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, eq, gte, lt } from 'drizzle-orm';
+import { AuthService } from 'src/auth/auth.service';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly database: NodePgDatabase<typeof dbSchema>,
+    private readonly authService: AuthService,
   ) {}
 
   /**
@@ -20,11 +23,22 @@ export class UserService {
   }
 
   /**
-   * Create a new user to databse
+   * Create a new user to database and generate a JWT for the user
    * @param user
+   * @returns
    */
-  async createUser(user: typeof dbSchema.users.$inferInsert) {
-    await this.database.insert(dbSchema.users).values(user);
+  async createUser(
+    user: typeof dbSchema.users.$inferInsert,
+  ): Promise<{ user: typeof dbSchema.users.$inferInsert; token: string }> {
+    try {
+      await this.database.insert(dbSchema.users).values(user);
+      const token = await this.authService.login({ email: user.email } as User);
+      return { user, token: token.access_token };
+    } catch (err: any) {
+      if (err.code === '23505')
+        throw new HttpException('User already exists', 409);
+      throw new HttpException('Unexpected error', 422);
+    }
   }
 
   /**
