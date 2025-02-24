@@ -1,99 +1,231 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# The News Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Descrição
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este projeto é um backend para um aplicativo de notícias. Ele fornece uma API para gerenciar e obter notícias.
 
-## Description
+## Configuração do Docker
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Para configurar e executar o projeto usando Docker, siga os passos abaixo:
 
-## Project setup
+1. Certifique-se de ter o Docker instalado em sua máquina.
+2. Navegue até o diretório do projeto.
+3. Execute o comando abaixo para construir a imagem Docker:
 
-```bash
-$ npm install
+    ```sh
+    docker build -t the-news-backend .
+    ```
+
+4. Após a construção da imagem, execute o comando abaixo para iniciar o contêiner:
+
+    ```sh
+    docker run -p 3000:3000 the-news-backend
+    ```
+
+## Rotas da API
+
+Abaixo estão as rotas disponíveis na API:
+
+### Rotas de NewsLetter
+
+#### GET /news-letter
+
+Retorna uma lista de todas as notícias.
+
+##### Exemplo de resposta
+
+```json
+[
+    {
+        "id": "b1ec735f-7adb-41db-9402-86ba5baefe34",
+        "title": "Newsletter teste1",
+        "sentAt": "2025-02-23 22:24:42.058715",
+        "utmCampaign": "campaign-teste-1",
+        "utmSource": "site",
+        "utmMedium": "site",
+        "utmChannel": "site",
+        "createdAt": "2025-02-23 22:24:42.058715"
+    },
+    // ...outras notícias
+]
 ```
 
-## Compile and run the project
+#### POST /news-letter
 
-```bash
-# development
-$ npm run start
+Cria uma nova notícia.
 
-# watch mode
-$ npm run start:dev
+##### Exemplo de corpo da requisição
 
-# production mode
-$ npm run start:prod
+```json
+{
+    "title": "Newsletter teste5",
+    "utmCampaign": "campaign-teste-3",
+    "utmSource": "site",
+    "utmMedium": "site",
+    "utmChannel": "site"
+}
 ```
 
-## Run tests
+### Rotas de Usuário
 
-```bash
-# unit tests
-$ npm run test
+#### POST /user
 
-# e2e tests
-$ npm run test:e2e
+Cria um novo usuário e gera um token JWT.
 
-# test coverage
-$ npm run test:cov
+##### Exemplo de corpo da requisição
+
+```json
+{
+    "email": "usuario@exemplo.com"
+}
 ```
 
-## Deployment
+##### Exemplo de resposta
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+```json
+{
+    "user": {
+        "email": "usuario@exemplo.com"
+    },
+    "token": "jwt_token_aqui"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+#### GET /user
 
-## Resources
+Retorna uma lista de todos os usuários.
 
-Check out a few resources that may come in handy when working with NestJS:
+##### Exemplo de resposta
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```json
+[
+    {
+        "id": "uuid_do_usuario",
+        "email": "usuario@exemplo.com",
+        "dayStreak": 5,
+        "lastLogin": "2023-10-01T12:00:00Z"
+    },
+    // ...outros usuários
+]
+```
 
-## Support
+#### PATCH /user/promote
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Promove um usuário a administrador.
 
-## Stay in touch
+##### Exemplo de corpo da requisição
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```json
+{
+    "userEmail": "usuario@exemplo.com"
+}
+```
 
-## License
+#### PATCH /user/demote
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Rebaixa um administrador a usuário comum.
+
+##### Exemplo de corpo da requisição
+
+```json
+{
+    "userEmail": "usuario@exemplo.com"
+}
+```
+
+#### GET /user/profile
+
+Retorna o perfil do usuário autenticado.
+
+##### Exemplo de resposta
+
+```json
+{
+    "id": "uuid_do_usuario",
+    "email": "usuario@exemplo.com",
+    "dayStreak": 5,
+    "lastLogin": "2023-10-01T12:00:00Z"
+}
+```
+
+#### PATCH /user/profile/streak
+
+Atualiza o streak diário do usuário.
+
+##### Parâmetros de consulta
+
+- `userEmail`: Email do usuário.
+- `newsletterId`: ID da newsletter.
+
+## Autenticação
+
+### POST /auth/login
+
+Realiza o login do usuário e retorna um token JWT.
+
+#### Exemplo de corpo da requisição
+
+```json
+{
+    "email": "usuario@exemplo.com"
+}
+```
+
+#### Exemplo de resposta
+
+```json
+{
+    "access_token": "jwt_token_aqui"
+}
+```
+
+## ORM Drizzle
+
+Este projeto utiliza o ORM Drizzle para interagir com o banco de dados PostgreSQL. O Drizzle fornece uma interface simples e poderosa para definir esquemas de banco de dados e realizar consultas.
+
+### Exemplo de definição de esquema
+
+```typescript
+import {
+  pgTable,
+  foreignKey,
+  unique,
+  uuid,
+  timestamp,
+  varchar,
+  integer,
+  smallint,
+} from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+
+export const users = pgTable(
+  'users',
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    email: varchar({ length: 55 }).notNull(),
+    lastLogin: timestamp('last_login', { mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    dayStreak: integer('day_streak').default(0),
+    createdAt: timestamp('created_at', { mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    isAdmin: smallint('is_admin').default(0),
+  },
+  table => [unique('users_email_unique').on(table.email)],
+);
+```
+
+## Contribuição
+
+Se você deseja contribuir com este projeto, por favor, faça um fork do repositório e envie um pull request.
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT.
