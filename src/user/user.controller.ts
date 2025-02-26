@@ -20,6 +20,7 @@ export class UserController {
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser({
+      name: createUserDto.name,
       email: createUserDto.email,
     });
   }
@@ -63,5 +64,12 @@ export class UserController {
     @Query('newsletterId') newsletterId: string,
   ) {
     return this.userService.createUserAccess(userEmail, newsletterId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('newsletters')
+  async getUserNewsletters(@Request() req: any) {
+    const userEmail = req.user.email;
+    return this.userService.getUserNewsletters(userEmail);
   }
 }

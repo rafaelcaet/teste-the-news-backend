@@ -40,12 +40,12 @@ export const newsLetter = pgTable('news_letter', {
   id: uuid().defaultRandom().primaryKey().notNull(),
   title: varchar({ length: 255 }).notNull(),
   sentAt: timestamp('sent_at', { mode: 'string' }).defaultNow().notNull(),
-  url: varchar('url', { length: 255 }),
   utmCampaign: varchar('utm_campaign', { length: 255 }),
   utmSource: varchar('utm_source', { length: 255 }),
   utmMedium: varchar('utm_medium', { length: 255 }),
   utmChannel: varchar('utm_channel', { length: 255 }),
   createdAt: timestamp('created_at', { mode: 'string' }).defaultNow().notNull(),
+  url: varchar({ length: 255 }),
 });
 
 export const users = pgTable(
@@ -67,6 +67,7 @@ export const users = pgTable(
       .defaultNow()
       .notNull(),
     isAdmin: smallint('is_admin').default(0),
+    name: varchar({ length: 255 }).default('user'),
   },
   table => [unique('users_email_unique').on(table.email)],
 );

@@ -27,13 +27,14 @@ export class UserService {
    * @param user
    * @returns
    */
-  async createUser(
-    user: typeof dbSchema.users.$inferInsert,
-  ): Promise<{ user: typeof dbSchema.users.$inferInsert; token: string }> {
+  async createUser(user: {
+    name: string;
+    email: string;
+  }): Promise<{ email: string; token: string }> {
     try {
       await this.database.insert(dbSchema.users).values(user);
       const token = await this.authService.login({ email: user.email } as User);
-      return { user, token: token.access_token };
+      return { email: user.email, token: token.access_token };
     } catch (err: any) {
       if (err.code === '23505')
         throw new HttpException('User already exists', 409);
@@ -97,7 +98,13 @@ export class UserService {
   async getUser(userEmail: string) {
     return this.database.query.users.findFirst({
       where: eq(dbSchema.users.email, userEmail),
-      columns: { id: true, email: true, dayStreak: true, lastLogin: true },
+      columns: {
+        id: true,
+        name: true,
+        email: true,
+        dayStreak: true,
+        lastLogin: true,
+      },
     });
   }
 
@@ -144,5 +151,37 @@ export class UserService {
         } as any) // Apliquei Any após apanhar muito pra entender que deveria tipar isso 🥹
         .where(eq(dbSchema.users.id, user.id));
     }
+  }
+
+  /**
+   * Get all newsletters opened by a specific user
+   * @param userEmail
+   * @returns Array of newsletters
+   */
+  async getUserNewsletters(userEmail: string) {
+    const result = await this.database
+      .select({
+        id: dbSchema.newsLetter.id,
+        url: dbSchema.newsLetter.url,
+        title: dbSchema.newsLetter.title,
+        sentAt: dbSchema.newsLetter.sentAt,
+        openAt: dbSchema.userNewsLetter.openAt,
+      })
+      .from(dbSchema.users)
+      .innerJoin(
+        dbSchema.userNewsLetter,
+        eq(dbSchema.users.id, dbSchema.userNewsLetter.userId),
+      )
+      .innerJoin(
+        dbSchema.newsLetter,
+        eq(dbSchema.userNewsLetter.newsLetterId, dbSchema.newsLetter.id),
+      )
+      .where(eq(dbSchema.users.email, userEmail));
+
+    if (!result.length) {
+      throw new HttpException('No newsletters found for this user', 404);
+    }
+
+    return result;
   }
 }
