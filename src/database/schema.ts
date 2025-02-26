@@ -40,6 +40,7 @@ export const newsLetter = pgTable('news_letter', {
   id: uuid().defaultRandom().primaryKey().notNull(),
   title: varchar({ length: 255 }).notNull(),
   sentAt: timestamp('sent_at', { mode: 'string' }).defaultNow().notNull(),
+  url: varchar('url', { length: 255 }),
   utmCampaign: varchar('utm_campaign', { length: 255 }),
   utmSource: varchar('utm_source', { length: 255 }),
   utmMedium: varchar('utm_medium', { length: 255 }),

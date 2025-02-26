@@ -1,0 +1,1 @@
+ALTER TABLE "news_letter" ADD COLUMN "url" varchar(255);

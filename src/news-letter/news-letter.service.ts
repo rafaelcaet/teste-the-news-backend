@@ -17,7 +17,22 @@ export class NewsLetterService {
     await this.database.insert(dbSchema.newsLetter).values(newsletter);
   }
 
+  /**
+   *  Get all newsletter from database
+   * @returns
+   */
   async getAll() {
-    return this.database.query.newsLetter.findMany();
+    return this.database.query.newsLetter.findMany({
+      columns: {
+        id: true,
+        title: true,
+        sentAt: true,
+        url: true,
+        utmCampaign: true,
+        utmChannel: true,
+        utmMedium: true,
+        utmSource: true,
+      },
+    });
   }
 }

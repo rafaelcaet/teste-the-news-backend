@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -17,7 +18,7 @@ export class UserController {
 
   /* public routes */
   @Post()
-  async createUser(@Body() createUserDto: { email: string }) {
+  async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser({
       email: createUserDto.email,
     });
