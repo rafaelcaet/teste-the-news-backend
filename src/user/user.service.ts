@@ -1,4 +1,9 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import * as dbSchema from '../database/schema';
 import { DATABASE_CONNECTION } from '../database/database-connection';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -114,11 +119,11 @@ export class UserService {
    * @param newsletterId
    */
   async createUserAccess(userEmail: string, newsletterId: string) {
-    // Buscar usuário pelo email
+    if (!newsletterId)
+      throw new UnprocessableEntityException('Newsletter não encontrada');
+
     const user = await this.getUser(userEmail);
-    if (!user) {
-      throw new Error('Usuário não encontrado');
-    }
+    if (!user) throw new UnprocessableEntityException('Usuário não encontrado');
 
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));

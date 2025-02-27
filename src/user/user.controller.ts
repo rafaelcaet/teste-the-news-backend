@@ -57,7 +57,7 @@ export class UserController {
     return this.userService.getUser(userEmail);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   @Patch('profile/streak')
   async updateDayStreak(
     @Query('userEmail') userEmail: string,
